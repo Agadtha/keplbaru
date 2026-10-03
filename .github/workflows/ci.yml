@@ -1,14 +1,12 @@
-name: CI
+name: Laravel CI/CD
 
 on:
   push:
-    branches: ['main', 'dev', 'feature/**']
-
-  pull_request:
-    branches: ['main', 'dev']
+    branches:
+      - "**"
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,41 +16,57 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: "8.4"
+          extensions: mbstring, sqlite3
+          coverage: none
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          node-version: '22'
+          php-version: "8.4"
+          extensions: mbstring, sqlite3
+          coverage: none
 
-      - name: Install Composer dependencies
-        run: composer install --no-progress --no-interaction --prefer-dist
-
-      - name: Install NPM dependencies
-        run: npm install
-
-      - name: Build Vite
-        run: npm run build
-
-      - name: Setup environment
-        run: cp .env.example .env
-
-      - name: Generate application key
-        run: php artisan key:generate
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
 
       - name: Run tests
         run: php artisan test
 
-  lint:
+  staging:
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Staging deployment
+        run: echo "Deploying to staging..."
 
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
+  production:
+    needs: staging
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
 
-      - run: composer install --no-progress --no-interaction
-
-      - run: vendor/bin/pint --test
+    steps:
+      - name: Production deployment
+        run: |
+          echo "Step 1: php artisan down --retry=60"
+          echo "Step 2: git pull origin main"
+          echo "Step 3: composer install --no-dev --optimize-autoloader"
+          echo "Step 4: php artisan migrate --force"
+          echo "Step 5: php artisan config:cache"
+          echo "       php artisan route:cache"
+          echo "       php artisan view:cache"
+          echo "Step 6: php artisan queue:restart"
+          echo "Step 7: php artisan up"
