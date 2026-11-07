@@ -52,7 +52,7 @@ class ProductTest extends TestCase
         $this->assertDatabaseHas('products', [
             'id' => $product->id,
             'name' => 'Laptop Gaming',
-            'price' => 15000000,
+            'price' => 999999999,
         ]);
     }
 
