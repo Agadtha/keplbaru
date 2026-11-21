@@ -10,3 +10,4 @@ describe('formatRupiah', () => {
     expect(formatRupiah('10000000.00')).toBe('Rp 10.000.000')
   })
 })
+
