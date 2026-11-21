@@ -1,5 +1,6 @@
 <?php
 
-Route::get('/user', function () {
-    return response()->json(['name' => 'John Doe', 'email' => 'john@example.com']);
-});
+use App\Models\Product;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/products', fn () => Product::all());
