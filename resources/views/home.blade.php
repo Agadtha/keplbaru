@@ -15,7 +15,7 @@
     </h1>
 
     <p>
-        Website promosi perusahaan kami.
+        Website promosi perusahaan kamiii.
     </p>
 
 </section>
