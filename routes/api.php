@@ -1,6 +1,7 @@
+
 <?php
 
-use App\Models\Product;
+use App\Http\Controllers\api\ProductController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/products', fn () => Product::all());
+Route::apiResource('products', ProductController::class);
